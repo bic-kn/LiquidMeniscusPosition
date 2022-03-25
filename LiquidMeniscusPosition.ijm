@@ -20,15 +20,17 @@
 // Martin Stöckl <martin.stoeckl@uni-konstanz.de>
 
 // This macro identifies the position of a liquid meniscus in a channel over
-// a time series of images and plots the positon against time
+// a time series of images and plots the position against time.
+// The macro works for single channel 16-bit transmitted light images where 
+// the meniscus is darker than the background
 
 
 // Constants, adjust as needed
-// The time series should start with the meniscus outside the FOV, 
-// set a START_FRAME where the meniscus is inside the FOV and clearly visible
+// The time series must start with the meniscus outside the FOV. 
+// Set a START_FRAME where the meniscus is inside the FOV and clearly visible
 START_FRAME = 10; 
 
-// get the necessary information from the image stack, assert correctly assigned dimensions and bit depth
+// Get the necessary information from the image stack, assert correctly assigned dimensions and bit depth
 original_image = getTitle();
 Stack.getDimensions(width, height, channels, slices, frames);
 if (frames == 1) {
@@ -52,8 +54,8 @@ Stack.getUnits(X, Y, Z, Time, Value);
 Stack.setFrame(1);
 run("Duplicate...", "title=first_frame");	
 
-// Subtract each frame from the channel features in the first frame,
-// Create a new stack from these images
+// Subtract each frame from the channel features in the first frame and
+// create a new stack from these images.
 selectWindow(original_image);	
 setBatchMode(true);
 for (f = 1; f <= frames; f++) {
@@ -67,7 +69,7 @@ close("first_frame");
 run("Images to Stack", "name=" + original_image + "_meniscus title=image_");
 setBatchMode(false);
 
-// Wait for the user to draw a line along the channel
+// Wait for the user to draw a line along the channel.
 Stack.setSlice(frames);
 setTool("line");
 while (selectionType() != 5) {
@@ -76,7 +78,7 @@ while (selectionType() != 5) {
 
 // For each frame measure the intensity profile along the channel, the brighest point is the 
 // meniscus, start from the START_FRAME with a visible meniscus, 
-// store the position of the most prominent intensity maximum
+// store the position of the most prominent intensity maximum.
 maxima_list = newArray(frames);
 
 for (f = START_FRAME; f <= frames; f++) {
@@ -95,3 +97,4 @@ for (i = 0; i < x_values.length; i++) {
 	maxima_list[i] *= pixelWidth;
 }
 Plot.create("Meniscus over time", "time / " + Time , "meniscus position / " + X, x_values, maxima_list);
+
